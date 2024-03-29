@@ -30874,19 +30874,37 @@ try {
     // Get the JSON webhook payload for the event that triggered the workflow
     const payload = JSON.stringify(github.context.payload, undefined, 2)
     console.log(`The event payload: ${payload}`);
+    console.log(`PR: ${github.context.issue.number}`);
 } catch (error) {
     core.setFailed(error.message);
 }
 
 async function updateMISRAComment(octokit, context, newCommentBody) {
     const { owner, repo } = context.repo;
-    const issue_number = context.issue.number; // Pull request number is the same as issue number
+
+    // Get branch name from ref
+    const branchName = context.ref.replace('refs/heads/', '');
+
+    // Find pull requests associated with the branch
+    const { data: pullRequests } = await octokit.rest.pulls.list({
+        ...context.repo,
+        state: 'open',
+        head: `${context.repo.owner}:${branchName}`
+    });
+
+    if (pullRequests.length === 0) {
+        core.setFailed('No related pull request found.');
+        return;
+    }
+
+    // Assuming you want to comment on the first related pull request
+    const pullRequestNumber = pullRequests[0].number;
 
     // Fetch all comments on the pull request
     const { data: comments } = await octokit.rest.issues.listComments({
         owner,
         repo,
-        issue_number,
+        pullRequestNumber,
     });
 
     // Find the comment with the hidden tag
@@ -30906,7 +30924,7 @@ async function updateMISRAComment(octokit, context, newCommentBody) {
         await octokit.rest.issues.createComment({
             owner,
             repo,
-            issue_number,
+            pullRequestNumber,
             body: newCommentBody,
         });
         console.log('Created a new MISRA C report comment.');
