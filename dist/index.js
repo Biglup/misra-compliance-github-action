@@ -30901,11 +30901,16 @@ async function updateMISRAComment(octokit, context, newCommentBody) {
     // Assuming you want to comment on the first related pull request
     const pullRequestNumber = pullRequests[0].number;
     console.log("g");
+
+    console.log(owner);
+    console.log(repo);
+    console.log(pullRequestNumber);
+    
     // Fetch all comments on the pull request
     const { data: comments } = await octokit.rest.issues.listComments({
         owner,
         repo,
-        pullRequestNumber,
+        issue_number: pullRequestNumber,
     });
     console.log("h");
     // Find the comment with the hidden tag
@@ -30928,7 +30933,7 @@ async function updateMISRAComment(octokit, context, newCommentBody) {
         await octokit.rest.issues.createComment({
             owner,
             repo,
-            pullRequestNumber,
+            issue_number: pullRequestNumber,
             body: newCommentBody,
         });
         console.log("m");
