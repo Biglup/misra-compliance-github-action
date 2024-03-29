@@ -41,7 +41,7 @@ async function updateMISRAComment(octokit, context, newCommentBody) {
     const { data: comments } = await octokit.rest.issues.listComments({
         owner,
         repo,
-        pullRequestNumber,
+        issue_number: pullRequestNumber,
     });
     console.log("h");
     // Find the comment with the hidden tag
@@ -64,7 +64,7 @@ async function updateMISRAComment(octokit, context, newCommentBody) {
         await octokit.rest.issues.createComment({
             owner,
             repo,
-            pullRequestNumber,
+            issue_number: pullRequestNumber,
             body: newCommentBody,
         });
         console.log("m");
