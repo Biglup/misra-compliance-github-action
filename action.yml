@@ -1,6 +1,9 @@
 name: 'MISRA C Compliance Report'
 description: 'A Github action which creates MISRA compliance reports (Guideline Compliance Summaries)'
 inputs:
+  GITHUB_TOKEN:
+    description: 'GitHub token for authentication'
+    required: true
   who-to-greet:  # id of input
     description: 'Who to greet'
     required: true
