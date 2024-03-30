@@ -30954,6 +30954,8 @@ async function run() {
         const suppressions = await parseSuppressions(filePathSuppressions);
         const results = await parsers[parser](filePath);
 
+        console.log(rules);
+        console.log(suppressions);
         console.log(filePath);
         console.log(results);
 
