@@ -62,10 +62,26 @@ async function updateMISRAComment(octokit, context, newCommentBody) {
     }
 }
 
+function constructFileUrl(filePath, lineNumber, githubContext) {
+    const owner = githubContext.payload.repository.owner.login;
+    const repo = githubContext.payload.repository.name;
+    const prBranch = githubContext.payload.pull_request.head.ref;
+    const basePath = process.env.GITHUB_WORKSPACE;
+    const relativePath = filePath.replace(`${basePath}/`, '');
+    return `https://github.com/${owner}/${repo}/blob/${prBranch}/${relativePath}#L${lineNumber}`;
+}
+
 const parser = core.getInput('parser');
 const filePathRules = core.getInput('rules');
 const filePathSuppressions = core.getInput('suppressions');
 const filePath = core.getInput('results');
+
+/*
+const parser = 'Cppcheck';
+const filePathRules = '/home/angel/sources/c/cardano-c/scripts/misra/misra2012';
+const filePathSuppressions = '/home/angel/sources/c/cardano-c/scripts/misra/suppressions';
+const filePath = '/home/angel/sources/c/cardano-c/scripts/misra/.results/results';
+*/
 
 async function run() {
     try {
@@ -73,29 +89,25 @@ async function run() {
         const suppressions = await parseSuppressions(filePathSuppressions);
         const results = await parsers[parser](filePath);
 
-        console.log(rules);
-        console.log(suppressions);
-        console.log(filePath);
-        console.log(results);
-
         const github_token = core.getInput('GITHUB_TOKEN');
         const octokit = github.getOctokit(github_token);
         const context = github.context;
 
-        // Render rule violations
-
         let message = "\<\!-- MISRA C REPORT --\>\n";
-        message += `| File | Line | Category | Rationale | Directive |\n`;
-        message += `| --- | --- | --- | --- | --- |\n`;
+        message += `| File | Directive | Category | Rationale |\n`;
+        message += `| --- | --- | --- | --- |\n`;
 
         for (const result of results) {
-            const rule = rules.find(rule => rule.directive === result.directive);
-            if (rule && !suppressions.includes(rule.directive)) {
-                message += `| ${result.file} | ${result.line} | ${rule.category} | ${result.rationale} | ${result.directive} |\n`;
+            const rule = rules.find(rule => rule.directive() === result.directive());
+            if (rule && !suppressions.includes(rule.directive())) {
+                const fileUrl = constructFileUrl(result.file(), result.lineNumber(), github.context);
+                const fileName = result.file().split('/').pop();
+                const markdownLink = `[${fileName}:${result.lineNumber()}](${fileUrl})`;
+
+                message += `| ${markdownLink} | ${result.directive()} | ${rule.category()} | ${result.rationale()} |\n`;
             }
         }
 
-        // render suppressions
         message += `\n\n### Suppressions\n\n`;
         message += `| Directive |\n`;
         message += `| --- |\n`;
@@ -104,6 +116,7 @@ async function run() {
             message += `| ${suppression} |\n`;
         }
 
+        console.log(message);
         await updateMISRAComment(octokit, context, message);
     } catch (error) {
         core.setFailed(error.message);
