@@ -30987,12 +30987,15 @@ async function run() {
 
         let message = "\<\!-- MISRA C REPORT --\>\n";
 
+        message += '\n';
         message += '<p align="left">\n';
         message += '   <img src="https://storage.googleapis.com/bunny-island/misra-c-logo.png" width="100" alt="MISRA C Logo">\n';
         message += '</p>\n';
 
+        message += '\n';
         message += '# MISRA Guideline Compliance Summary\n';
 
+        message += '\n';
         message += '<table border="0">\n';
         message += '    <tr>\n';
         message += '        <td><b>Commit:</b></td>\n';
@@ -31017,6 +31020,7 @@ async function run() {
         message += '</table>\n';
 
         if (results.length === 0) {
+            message += '\n';
             message += '## No MISRA C 2012 violations found. :tada:\n';
             await updateMISRAComment(octokit, context, message);
             return;
@@ -31032,8 +31036,9 @@ async function run() {
             return acc;
         }, {});
 
+        message += '\n';
         message += '## MISRA C 2012 Violation Summary\n';
-        message += '<table border="1">\n';
+        message += '<table>\n';
         message += '    <tr>\n';
         message += '        <th>Category</th>\n';
         message += '        <th>Violations</th>\n';
@@ -31045,10 +31050,12 @@ async function run() {
             message += `        <td>${count}</td>\n`;
             message += '    </tr>\n';
         }
+        message += '</table><br/>\n';
 
-        message += '</table>\n';
+        message += '<details>\n';
+        message += `    <summary>Click here to toggle the visibility of the <b>${results.length}</b> violations</summary>\n`;
 
-        message += `## MISRA C 2012 Violations\n`;
+        message += `\n`;
         message += `| File | Directive | Category | Rationale |\n`;
         message += `| --- | --- | --- | --- |\n`;
 
@@ -31062,6 +31069,7 @@ async function run() {
                 message += `| ${markdownLink} | ${result.directive()} | ${rule.category()} | ${result.rationale()} |\n`;
             }
         }
+        message += `</details>\n`;
 
         await updateMISRAComment(octokit, context, message);
     } catch (error) {
