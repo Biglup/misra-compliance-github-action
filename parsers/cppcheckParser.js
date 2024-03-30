@@ -15,6 +15,7 @@ export const cppcheckParser = async (filePath) => {
     const violations = [];
 
     for await (const line of lines) {
+        console.log(line);
         const cleanedLine = removeAnsiColorCodes(line);
         const match = regex.exec(cleanedLine);
         if (match) {

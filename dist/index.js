@@ -30713,9 +30713,9 @@ var __webpack_exports__ = {};
 (() => {
 
 // EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
-var lib_core = __nccwpck_require__(5969);
+var core = __nccwpck_require__(5969);
 // EXTERNAL MODULE: ./node_modules/@actions/github/lib/github.js
-var lib_github = __nccwpck_require__(2262);
+var github = __nccwpck_require__(2262);
 // EXTERNAL MODULE: external "fs"
 var external_fs_ = __nccwpck_require__(7147);
 ;// CONCATENATED MODULE: external "readline"
@@ -30769,6 +30769,7 @@ const cppcheckParser = async (filePath) => {
     const violations = [];
 
     for await (const line of lines) {
+        console.log(line);
         const cleanedLine = removeAnsiColorCodes(line);
         const match = regex.exec(cleanedLine);
         if (match) {
@@ -30904,7 +30905,7 @@ async function updateMISRAComment(octokit, context, newCommentBody) {
     });
 
     if (pullRequests.length === 0) {
-        lib_core.setFailed('No related pull request found.');
+        core.setFailed('No related pull request found.');
         return;
     }
 
@@ -30942,31 +30943,10 @@ async function updateMISRAComment(octokit, context, newCommentBody) {
     }
 }
 
-const parseViolations = (parseFunction, filePath) => {
-    parseFunction(filePath).then(async (violations) => {
-        const github_token = core.getInput('GITHUB_TOKEN');
-        const octokit = github.getOctokit(github_token);
-        const context = github.context;
-
-
-        // Your message
-        const message = "\<\!-- MISRA C REPORT --\>\n" +
-            "\# MISRA C report \n\n" +
-            "|X|Z|Y|\n" +
-            "|---|---|---|\n" +
-            "| [lib/src/cbor/cbor\\_reader/cbor\\_reader\\_collections.c](https://app.codecov.io/gh/Biglup/cardano-c/pull/23?src=pr&el=tree&utm_medium=referral&utm_source=github&utm_content=comment&utm_campaign=pr+comments&utm_term=Biglup#diff-bGliL3NyYy9jYm9yL2Nib3JfcmVhZGVyL2Nib3JfcmVhZGVyX2NvbGxlY3Rpb25zLmM=) | 87.50% | [1 Missing :warning: ](https://app.codecov.io/gh/Biglup/cardano-c/pull/23?src=pr&el=tree&utm_medium=referral&utm_source=github&utm_content=comment&utm_campaign=pr+comments&utm_term=Biglup) |\n" +
-            "| [lib/src/cbor/cbor\\_reader/cbor\\_reader\\_numeric.c](https://app.codecov.io/gh/Biglup/cardano-c/pull/23?src=pr&el=tree&utm_medium=referral&utm_source=github&utm_content=comment&utm_campaign=pr+comments&utm_term=Biglup#diff-bGliL3NyYy9jYm9yL2Nib3JfcmVhZGVyL2Nib3JfcmVhZGVyX251bWVyaWMuYw==) | 0.00% | [1 Missing :warning: ](https://app.codecov.io/gh/Biglup/cardano-c/pull/23?src=pr&el=tree&utm_medium=referral&utm_source=github&utm_content=comment&utm_campaign=pr+comments&utm_term=Biglup) |"
-
-        await updateMISRAComment(octokit, context, message);
-    }).catch(error => {
-        core.setFailed(error.message);
-    });
-};
-
-const parser = lib_core.getInput('parser');
-const filePathRules = lib_core.getInput('rules');
-const filePathSuppressions = lib_core.getInput('suppressions');
-const filePath = lib_core.getInput('results');
+const parser = core.getInput('parser');
+const filePathRules = core.getInput('rules');
+const filePathSuppressions = core.getInput('suppressions');
+const filePath = core.getInput('results');
 
 async function run() {
     try {
@@ -30974,9 +30954,12 @@ async function run() {
         const suppressions = await parseSuppressions(filePathSuppressions);
         const results = await parsers[parser](filePath);
 
-        const github_token = lib_core.getInput('GITHUB_TOKEN');
-        const octokit = lib_github.getOctokit(github_token);
-        const context = lib_github.context;
+        console.log(filePath);
+        console.log(results);
+
+        const github_token = core.getInput('GITHUB_TOKEN');
+        const octokit = github.getOctokit(github_token);
+        const context = github.context;
 
         // Render rule violations
 
@@ -31002,10 +30985,10 @@ async function run() {
 
         await updateMISRAComment(octokit, context, message);
     } catch (error) {
-        lib_core.setFailed(error.message);
+        core.setFailed(error.message);
     }
 }
 
-run().catch(lib_core.setFailed);
+run().catch(core.setFailed);
 })();
 
