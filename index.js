@@ -81,17 +81,19 @@ function constructFileUrl(filePath, lineNumber, githubContext) {
     return `https://github.com/${owner}/${repo}/blob/${ref}/${relativePath}#L${lineNumber}`;
 }
 
+function getCurrentDateFormatted() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = (now.getMonth() + 1).toString().padStart(2, '0');
+    const day = now.getDate().toString().padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+}
+
 const parser = core.getInput('parser');
 const filePathRules = core.getInput('rules');
 const filePathSuppressions = core.getInput('suppressions');
 const filePath = core.getInput('results');
-
-/*
-const parser = 'Cppcheck';
-const filePathRules = '/home/angel/sources/c/cardano-c/scripts/misra/misra2012';
-const filePathSuppressions = '/home/angel/sources/c/cardano-c/scripts/misra/suppressions';
-const filePath = '/home/angel/sources/c/cardano-c/scripts/misra/.results/results';
-*/
 
 async function run() {
     try {
@@ -104,6 +106,69 @@ async function run() {
         const context = github.context;
 
         let message = "\<\!-- MISRA C REPORT --\>\n";
+
+        message += '<p align="left">\n';
+        message += '   <img src="https://storage.googleapis.com/bunny-island/misra-c-logo.png" width="100" alt="MISRA C Logo">\n';
+        message += '</p>\n';
+
+        message += '# MISRA Guideline Compliance Summary\n';
+
+        message += '<table border="0">\n';
+        message += '    <tr>\n';
+        message += '        <td><b>Commit:</b></td>\n';
+        message += `        <td><code>${process.env.GITHUB_SHA}</code></td>\n`;
+        message += '    </tr>\n';
+        message += '    <tr>\n';
+        message += '        <td><b>Date:</b></td>\n';
+        message += `        <td>${getCurrentDateFormatted()}</td>\n`;
+        message += '    </tr>\n';
+        message += '    <tr>\n';
+        message += '        <td><b>Guidelines:</b></td>\n';
+        message += '        <td>MISRA C 2012</td>\n'; // TODO: make this configurable
+        message += '    </tr>\n';
+        message += '    <tr>\n';
+        message += '        <td><b>Checking Tool:</b></td>\n';
+        message += `        <td>${parser}</td>\n`;
+        message += '    </tr>\n';
+        message += '    <tr>\n';
+        message += '        <td><b>Result:</b></td>\n';
+        message += results.length > 0 ? '        <td>Non-Compliant ❌</td>\n' :  '        <td>Compliant ✅</td>\n';
+        message += '    </tr>\n';
+        message += '</table>\n';
+
+        if (results.length === 0) {
+            message += '## No MISRA C 2012 violations found. :tada:\n';
+            await updateMISRAComment(octokit, context, message);
+            return;
+        }
+
+        const violationsByCategory = results.reduce((acc, result) => {
+            if (acc[result.category()]) {
+                acc[result.category()]++;
+            } else {
+                acc[result.category()] = 1;
+            }
+
+            return acc;
+        }, {});
+
+        message += '## MISRA C 2012 Violation Summary\n';
+        message += '<table border="1">\n';
+        message += '    <tr>\n';
+        message += '        <th>Category</th>\n';
+        message += '        <th>Violations</th>\n';
+        message += '    </tr>\n';
+
+        for (const [category, count] of Object.entries(violationsByCategory)) {
+            message += '    <tr>\n';
+            message += `        <td>${category}</td>\n`;
+            message += `        <td>${count}</td>\n`;
+            message += '    </tr>\n';
+        }
+
+        message += '</table>\n';
+
+        message += `## MISRA C 2012 Violations\n`;
         message += `| File | Directive | Category | Rationale |\n`;
         message += `| --- | --- | --- | --- |\n`;
 
