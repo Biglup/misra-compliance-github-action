@@ -1,4 +1,5 @@
 {
+  "type": "module",
   "name": "misra-compliance-github-action",
   "version": "1.0.0",
   "description": "About A Github action which creates MISRA compliance reports (Guideline Compliance Summaries)",

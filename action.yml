@@ -4,13 +4,19 @@ inputs:
   GITHUB_TOKEN:
     description: 'GitHub token for authentication'
     required: true
-  who-to-greet:  # id of input
-    description: 'Who to greet'
+  parser:
+    description: 'Analysis tool output parser'
     required: true
-    default: 'World'
-outputs:
-  time: # id of output
-    description: 'The time we greeted you'
+    default: 'Cppcheck' # Options [Cppcheck, PC-lint]
+  results:
+    description: 'Results'
+    required: true
+  rules:
+    description: 'List of rules'
+    required: true
+  suppressions:
+    description: 'List of suppresions'
+    required: true
 runs:
   using: 'node20'
   main: 'dist/index.js'
