@@ -65,10 +65,12 @@ async function updateMISRAComment(octokit, context, newCommentBody) {
 function constructFileUrl(filePath, lineNumber, githubContext) {
     const owner = githubContext.payload.repository.owner.login;
     const repo = githubContext.payload.repository.name;
-    const prBranch = githubContext.payload.pull_request.head.ref;
+
+    const sha = githubContext.payload.ref.split('/').pop();
+
     const basePath = process.env.GITHUB_WORKSPACE;
     const relativePath = filePath.replace(`${basePath}/`, '');
-    return `https://github.com/${owner}/${repo}/blob/${prBranch}/${relativePath}#L${lineNumber}`;
+    return `https://github.com/${owner}/${repo}/blob/${sha}/${relativePath}#L${lineNumber}`;
 }
 
 const parser = core.getInput('parser');
