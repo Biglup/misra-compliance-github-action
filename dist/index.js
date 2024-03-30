@@ -30946,11 +30946,19 @@ function constructFileUrl(filePath, lineNumber, githubContext) {
     const owner = githubContext.payload.repository.owner.login;
     const repo = githubContext.payload.repository.name;
 
-    const sha = githubContext.payload.ref.split('/').pop();
+    // Initialize with commit SHA; it's always available and serves as a good fallback
+    let ref = process.env.GITHUB_SHA;
+
+    // If in the context of a pull request, prefer using the PR's branch name
+    if (githubContext.eventName === 'pull_request' && githubContext.payload.pull_request) {
+        ref = githubContext.payload.pull_request.head.ref;
+    }
 
     const basePath = process.env.GITHUB_WORKSPACE;
-    const relativePath = filePath.replace(`${basePath}/`, '');
-    return `https://github.com/${owner}/${repo}/blob/${sha}/${relativePath}#L${lineNumber}`;
+    // Ensure filePath is relative to the repository root
+    const relativePath = filePath.startsWith(basePath) ? filePath.substring(basePath.length + 1) : filePath;
+
+    return `https://github.com/${owner}/${repo}/blob/${ref}/${relativePath}#L${lineNumber}`;
 }
 
 const parser = core.getInput('parser');
@@ -30990,15 +30998,6 @@ async function run() {
             }
         }
 
-        message += `\n\n### Suppressions\n\n`;
-        message += `| Directive |\n`;
-        message += `| --- |\n`;
-
-        for (const suppression of suppressions) {
-            message += `| ${suppression} |\n`;
-        }
-
-        console.log(message);
         await updateMISRAComment(octokit, context, message);
     } catch (error) {
         core.setFailed(error.message);
