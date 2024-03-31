@@ -17,6 +17,10 @@ const parsers = {
 async function updateMISRAComment(octokit, context, newCommentBody) {
     const { owner, repo } = context.repo;
 
+    console.log(`Updating MISRA C report comment on pull request #${context.payload.pull_request.number}.`);
+    console.log(context);
+    console.log(context);
+
     // Get branch name from ref
     const branchName = context.ref.replace('refs/heads/', '');
 
