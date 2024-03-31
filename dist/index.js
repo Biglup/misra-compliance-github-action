@@ -74042,6 +74042,7 @@ class TransferManager {
 
 
 
+
 const BASE_URL = 'https://storage.googleapis.com/misra-c/'; // TODO: Remove hardcoded URL.
 
 // Creates a client
@@ -74050,7 +74051,7 @@ const storage = new Storage();
 function computeFileHash(filename) {
     return new Promise((resolve, reject) => {
         const hash = external_crypto_.createHash('md5');
-        const stream = fs.createReadStream(filename);
+        const stream = external_fs_.createReadStream(filename);
 
         stream.on('error', err => reject(err));
         stream.on('data', chunk => hash.update(chunk));

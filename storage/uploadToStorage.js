@@ -1,5 +1,6 @@
 import {Storage} from '@google-cloud/storage';
 import crypto from 'crypto';
+import fs from 'fs';
 
 const BASE_URL = 'https://storage.googleapis.com/misra-c/'; // TODO: Remove hardcoded URL.
 
