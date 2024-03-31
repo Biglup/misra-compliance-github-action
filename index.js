@@ -266,7 +266,8 @@ async function run() {
         message += `</details>\n`;
 
         const uploadedReport = await uploadReportToGoogleCloud(process.env.GITHUB_SHA);
-        message += `You can download the report in PDF from here: [MISRA C Report](${uploadedReport})\n`;
+        message += `\n`;
+        message += `You can download the complete report from: [MISRA C Report](${uploadedReport})\n`;
 
         await updateMISRAComment(octokit, context, message);
     } catch (error) {
