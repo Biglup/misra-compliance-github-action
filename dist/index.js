@@ -59875,7 +59875,7 @@ const filePathSuppressions = _actions_core__WEBPACK_IMPORTED_MODULE_2__.getInput
 const resultPath = _actions_core__WEBPACK_IMPORTED_MODULE_2__.getInput('results');
 const project = _actions_core__WEBPACK_IMPORTED_MODULE_2__.getInput('project');
 const filesPath = _actions_core__WEBPACK_IMPORTED_MODULE_2__.getInput('files');
-const outputFile = "report.pdf";
+const outputFile = '/tmp/report.pdf';
 
 const toComplianceTable = (rules, results, suppresions) => {
     return rules.map(rule => {
@@ -59912,10 +59912,9 @@ async function parseFileList(fileList) {
 async function uploadReportToGoogleCloud(hash) {
     // Example usage
     const bucketName = 'misra-c'; // TODO: Hardcoded for now. Make this an input?
-    const filename = 'report.pdf';
     const destination = `MISRA_c_compliance_report_${hash}.pdf`;
 
-    return (0,_storage_uploadToStorage_js__WEBPACK_IMPORTED_MODULE_8__/* .uploadFile */ .c)(bucketName, filename, destination);
+    return (0,_storage_uploadToStorage_js__WEBPACK_IMPORTED_MODULE_8__/* .uploadFile */ .c)(bucketName, outputFile, destination);
 }
 
 async function run() {

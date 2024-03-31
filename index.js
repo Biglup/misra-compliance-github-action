@@ -7,7 +7,7 @@ import { pcLintParser } from './parsers/pclintParser.js';
 import { parseRules } from './rules/parseRules.js';
 import { parseSuppressions } from './rules/parseSuppressions.js';
 import { generatePdfReport } from './pdf/generate-pdf-report.js';
-import {uploadFile} from "./storage/uploadToStorage.js";
+import { uploadFile } from "./storage/uploadToStorage.js";
 
 const parsers = {
     'Cppcheck': cppcheckParser,
@@ -84,7 +84,7 @@ const filePathSuppressions = core.getInput('suppressions');
 const resultPath = core.getInput('results');
 const project = core.getInput('project');
 const filesPath = core.getInput('files');
-const outputFile = "report.pdf";
+const outputFile = '/tmp/report.pdf';
 
 const toComplianceTable = (rules, results, suppresions) => {
     return rules.map(rule => {
@@ -121,10 +121,9 @@ async function parseFileList(fileList) {
 async function uploadReportToGoogleCloud(hash) {
     // Example usage
     const bucketName = 'misra-c'; // TODO: Hardcoded for now. Make this an input?
-    const filename = 'report.pdf';
     const destination = `MISRA_c_compliance_report_${hash}.pdf`;
 
-    return uploadFile(bucketName, filename, destination);
+    return uploadFile(bucketName, outputFile, destination);
 }
 
 async function run() {
