@@ -5,6 +5,11 @@ import {addResultTableRow, addTableHeaders} from "./render-results-table.js";
 import {renderDeviations} from "./render-suppresions.js";
 import {addFileAnalyzed} from "./render-files-analyzed.js";
 
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const PDFDocument = await import('pdfkit').then(pkg => pkg.default || pkg);
 
 const LEFT_MARGIN = 75;

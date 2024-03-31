@@ -60184,15 +60184,21 @@ __nccwpck_require__.a(__webpack_module__, async (__webpack_handle_async_dependen
 /* harmony export */ });
 /* harmony import */ var fs__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(57147);
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(71017);
-/* harmony import */ var _render_results_table_js__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(48189);
-/* harmony import */ var _render_suppresions_js__WEBPACK_IMPORTED_MODULE_3__ = __nccwpck_require__(50813);
-/* harmony import */ var _render_files_analyzed_js__WEBPACK_IMPORTED_MODULE_4__ = __nccwpck_require__(70948);
+/* harmony import */ var _render_results_table_js__WEBPACK_IMPORTED_MODULE_3__ = __nccwpck_require__(48189);
+/* harmony import */ var _render_suppresions_js__WEBPACK_IMPORTED_MODULE_4__ = __nccwpck_require__(50813);
+/* harmony import */ var _render_files_analyzed_js__WEBPACK_IMPORTED_MODULE_5__ = __nccwpck_require__(70948);
+/* harmony import */ var url__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(57310);
 
 
 
 
 
 
+
+
+
+const __filename = (0,url__WEBPACK_IMPORTED_MODULE_2__.fileURLToPath)(import.meta.url);
+const __dirname = path__WEBPACK_IMPORTED_MODULE_1__.dirname(__filename);
 
 const PDFDocument = await __nccwpck_require__.e(/* import() */ 619).then(__nccwpck_require__.t.bind(__nccwpck_require__, 6619, 19)).then(pkg => pkg.default || pkg);
 
@@ -60291,11 +60297,11 @@ async function generatePdfReport(result) {
     // Render Results
     const headers = ['Guideline', 'Category', 'Recategorization', 'Compliance'];
 
-    (0,_render_results_table_js__WEBPACK_IMPORTED_MODULE_2__/* .addTableHeaders */ .T)(headers, doc, LEFT_MARGIN, 430, LINE_MARGIN, [114, 114, 114, 114]);
-    rules.forEach((row, index) => (0,_render_results_table_js__WEBPACK_IMPORTED_MODULE_2__/* .addResultTableRow */ .n)(doc, row, index));
+    (0,_render_results_table_js__WEBPACK_IMPORTED_MODULE_3__/* .addTableHeaders */ .T)(headers, doc, LEFT_MARGIN, 430, LINE_MARGIN, [114, 114, 114, 114]);
+    rules.forEach((row, index) => (0,_render_results_table_js__WEBPACK_IMPORTED_MODULE_3__/* .addResultTableRow */ .n)(doc, row, index));
     doc.addPage();
 
-    (0,_render_suppresions_js__WEBPACK_IMPORTED_MODULE_3__/* .renderDeviations */ .Vz)(doc);
+    (0,_render_suppresions_js__WEBPACK_IMPORTED_MODULE_4__/* .renderDeviations */ .Vz)(doc);
     doc.addPage();
 
     // Render Files Analyzed
@@ -60303,7 +60309,7 @@ async function generatePdfReport(result) {
         .fontSize(TITLE_FONT_SIZE)
         .text('Files Analyzed', LEFT_MARGIN, 75);
 
-    files.forEach((row, index) => (0,_render_files_analyzed_js__WEBPACK_IMPORTED_MODULE_4__/* .addFileAnalyzed */ .G)(doc, row, index));
+    files.forEach((row, index) => (0,_render_files_analyzed_js__WEBPACK_IMPORTED_MODULE_5__/* .addFileAnalyzed */ .G)(doc, row, index));
 
     doc.end();
 }
