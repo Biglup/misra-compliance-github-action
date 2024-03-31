@@ -60015,7 +60015,7 @@ async function run() {
 
             const uploadedReport = await uploadReportToGoogleCloud(process.env.GITHUB_SHA);
             message += '## 🎉 No MISRA C 2012 Violations Found!\n';
-            message += `You can download the report in PDF from here: [MISRA C Report](${uploadedReport})\n`;
+            message += `You can download the complete report from: [MISRA C Report](${uploadedReport})\n`;
 
             await updateMISRAComment(octokit, context, message);
             return;
