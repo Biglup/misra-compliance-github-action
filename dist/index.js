@@ -60028,7 +60028,17 @@ async function run() {
         message += '        <th>Violations</th>\n';
         message += '    </tr>\n';
 
-        for (const [category, count] of Object.entries(violationsByCategory)) {
+        const ruleViolations = results.reduce((acc, result) => {
+            if (acc[result.category]) {
+                acc[result.category]++;
+            } else {
+                acc[result.category] = 1;
+                return acc;
+            }
+            return acc;
+        }, {});
+
+        for (const [category, count] of Object.entries(ruleViolations)) {
             message += '    <tr>\n';
             message += `        <td>${category}</td>\n`;
             message += `        <td>${count}</td>\n`;
