@@ -230,7 +230,7 @@ async function run() {
         }
 
         message += '\n';
-        message += '## MISRA C 2012 Violation Summary\n';
+        message += '## Violations Summary\n';
         message += '<table>\n';
         message += '    <tr>\n';
         message += '        <th>Category</th>\n';
@@ -238,10 +238,11 @@ async function run() {
         message += '    </tr>\n';
 
         const ruleViolations = results.reduce((acc, result) => {
-            if (acc[result.category]) {
-                acc[result.category]++;
+            const category = rules.find(rule => rule.directive() === result.directive()).category();
+            if (acc[category]) {
+                acc[category]++;
             } else {
-                acc[result.category] = 1;
+                acc[category] = 1;
                 return acc;
             }
             return acc;
