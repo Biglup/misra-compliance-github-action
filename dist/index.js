@@ -74049,6 +74049,9 @@ const storage = new Storage();
 async function uploadFile(bucketName, filename, destination) {
     await storage.bucket(bucketName).upload(filename, {
         destination: destination,
+        metadata: {
+            contentType: 'application/pdf'
+        },
     });
 
     console.log(`${filename} uploaded to ${bucketName}/${destination}`);
