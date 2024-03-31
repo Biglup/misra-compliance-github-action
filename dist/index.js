@@ -59808,27 +59808,7 @@ const parsers = {
 async function updateMISRAComment(octokit, context, newCommentBody) {
     const { owner, repo } = context.repo;
 
-    console.log(`Updating MISRA C report comment on pull request #${context.payload.pull_request.number}.`);
-    console.log(context);
-    console.log(context);
-
-    // Get branch name from ref
-    const branchName = context.ref.replace('refs/heads/', '');
-
-    // Find pull requests associated with the branch
-    const { data: pullRequests } = await octokit.rest.pulls.list({
-        ...context.repo,
-        state: 'open',
-        head: `${context.repo.owner}:${branchName}`
-    });
-
-    if (pullRequests.length === 0) {
-        _actions_core__WEBPACK_IMPORTED_MODULE_2__.setFailed('No related pull request found.');
-        return;
-    }
-
-    // Assuming you want to comment on the first related pull request
-    const pullRequestNumber = pullRequests[0].number;
+    const pullRequestNumber = context.payload.pull_request.number;
 
     // Fetch all comments on the pull request
     const { data: comments } = await octokit.rest.issues.listComments({
