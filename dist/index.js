@@ -59925,22 +59925,6 @@ async function run() {
         const files = await parseFileList(filesPath);
         const complianceTable = toComplianceTable(rules, results, suppressions);
 
-        const violationsByCategory = complianceTable.reduce((acc, result) => {
-            if (acc[result.category]) {
-                if (result.compliance !== 'NON-COMPLIANT') return acc;
-                acc[result.category]++;
-            } else {
-                acc[result.category] = 0;
-
-                if (result.compliance === 'NON-COMPLIANT')
-                    acc[result.category]++;
-
-                return acc;
-            }
-
-            return acc;
-        }, {});
-
         const deviationsByCategory = complianceTable.reduce((acc, result) => {
             if (acc[result.category]) {
                 if (result.compliance !== 'DEVIATION') return acc;
@@ -59957,6 +59941,17 @@ async function run() {
             return acc;
         }, {});
 
+        const ruleViolations = results.reduce((acc, result) => {
+            const category = rules.find(rule => rule.directive() === result.directive()).category();
+            if (acc[category]) {
+                acc[category]++;
+            } else {
+                acc[category] = 1;
+                return acc;
+            }
+            return acc;
+        }, { Advisory: 0, Required: 0, Mandatory: 0 });
+
         await (0,_pdf_generate_pdf_report_js__WEBPACK_IMPORTED_MODULE_7__/* .generatePdfReport */ .K)({
             rules: complianceTable,
             files,
@@ -59967,7 +59962,7 @@ async function run() {
             checkingTool: parser,
             compliance: results.length > 0 ? 'Non-Compliant' : 'Compliant',
             outputFile,
-            violationsByCategory,
+            ruleViolations,
             deviationsByCategory
         });
 
@@ -60027,17 +60022,6 @@ async function run() {
         message += '        <th>Category</th>\n';
         message += '        <th>Violations</th>\n';
         message += '    </tr>\n';
-
-        const ruleViolations = results.reduce((acc, result) => {
-            const category = rules.find(rule => rule.directive() === result.directive()).category();
-            if (acc[category]) {
-                acc[category]++;
-            } else {
-                acc[category] = 1;
-                return acc;
-            }
-            return acc;
-        }, {});
 
         for (const [category, count] of Object.entries(ruleViolations)) {
             message += '    <tr>\n';
