@@ -60266,7 +60266,8 @@ async function generatePdfReport(result) {
     const { rules, files, project, commit, date, guidelines, checkingTool, compliance, outputFile, violationsByCategory, deviationsByCategory } = result;
 
     const doc = new PDFDocument();
-    doc.pipe(fs__WEBPACK_IMPORTED_MODULE_0__.createWriteStream(outputFile));
+    const stream = fs__WEBPACK_IMPORTED_MODULE_0__.createWriteStream(outputFile);
+    doc.pipe(stream);
 
     doc.image(MISRA_LOGO, LEFT_MARGIN, 75, { width: MISRA_WIDTH });
 
@@ -60296,6 +60297,14 @@ async function generatePdfReport(result) {
     files.forEach((row, index) => (0,_render_files_analyzed_js__WEBPACK_IMPORTED_MODULE_4__/* .addFileAnalyzed */ .G)(doc, row, index));
 
     doc.end();
+
+    // Wait for the stream to finish
+    await new Promise((resolve, reject) => {
+        stream.on('finish', resolve);
+        stream.on('error', reject);
+    });
+
+    console.log(`PDF report generated at ${outputFile}`);
 }
 
 __webpack_async_result__();

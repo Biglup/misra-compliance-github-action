@@ -92,7 +92,8 @@ export async function generatePdfReport(result) {
     const { rules, files, project, commit, date, guidelines, checkingTool, compliance, outputFile, violationsByCategory, deviationsByCategory } = result;
 
     const doc = new PDFDocument();
-    doc.pipe(fs.createWriteStream(outputFile));
+    const stream = fs.createWriteStream(outputFile);
+    doc.pipe(stream);
 
     doc.image(MISRA_LOGO, LEFT_MARGIN, 75, { width: MISRA_WIDTH });
 
@@ -122,4 +123,12 @@ export async function generatePdfReport(result) {
     files.forEach((row, index) => addFileAnalyzed(doc, row, index));
 
     doc.end();
+
+    // Wait for the stream to finish
+    await new Promise((resolve, reject) => {
+        stream.on('finish', resolve);
+        stream.on('error', reject);
+    });
+
+    console.log(`PDF report generated at ${outputFile}`);
 }
