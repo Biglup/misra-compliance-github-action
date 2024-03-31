@@ -7,25 +7,26 @@ const BASE_URL = 'https://storage.googleapis.com/misra-c/'; // TODO: Remove hard
 // Creates a client
 const storage = new Storage();
 
-function computeFileHash(filename) {
-    return new Promise((resolve, reject) => {
-        const hash = crypto.createHash('md5');
-        const stream = fs.createReadStream(filename);
+async function computeFileHashFromBuffer(buffer) {
+    const crypto = require('crypto');
+    const hash = crypto.createHash('md5');
+    hash.update(buffer);
+    return hash.digest('hex');
+}
 
-        stream.on('error', err => reject(err));
-        stream.on('data', chunk => hash.update(chunk));
-        stream.on('end', () => resolve(hash.digest('hex')));
-    });
+async function readFileIntoBuffer(filename) {
+    return fs.readFile(filename);
 }
 
 export async function uploadFile(bucketName, filename, destination) {
-    const hash = await computeFileHash(filename);
+    const buffer = await readFileIntoBuffer(filename);
+    const hash = await computeFileHashFromBuffer(buffer);
+
     console.log(`File hash: ${hash}`);
 
-    await storage.bucket(bucketName).upload(filename, {
-        destination: destination,
+    await storage.bucket(bucketName).file(destination).save(buffer, {
         metadata: {
-            contentType: 'application/pdf'
+            contentType: 'application/pdf',
         },
     });
 
