@@ -171,7 +171,7 @@ async function run() {
             checkingTool: parser,
             compliance: results.length > 0 ? 'Non-Compliant' : 'Compliant',
             outputFile,
-            ruleViolations,
+            violationsByCategory: ruleViolations,
             deviationsByCategory
         });
 
