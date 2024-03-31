@@ -24,11 +24,18 @@ export async function uploadFile(bucketName, filename, destination) {
 
     console.log(`File hash: ${hash}`);
 
-    await storage.bucket(bucketName).file(destination).save(buffer, {
-        metadata: {
-            contentType: 'application/pdf',
-        },
-    });
+    const file = storage.bucket(bucketName).file(destination);
+    try {
+        await file.save(buffer, {
+            metadata: {
+                contentType: 'application/pdf',
+            },
+        });
+        console.log(`Buffer uploaded to ${bucketName}/${destination}`);
+    } catch (error) {
+        console.error('Error uploading buffer:', error);
+        throw error; // Rethrow or handle the error appropriately
+    }
 
     console.log(`${filename} uploaded to ${bucketName}/${destination}`);
 
