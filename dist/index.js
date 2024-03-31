@@ -60184,10 +60184,10 @@ __nccwpck_require__.a(__webpack_module__, async (__webpack_handle_async_dependen
 /* harmony export */ });
 /* harmony import */ var fs__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(57147);
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(71017);
-/* harmony import */ var _render_results_table_js__WEBPACK_IMPORTED_MODULE_3__ = __nccwpck_require__(48189);
-/* harmony import */ var _render_suppresions_js__WEBPACK_IMPORTED_MODULE_4__ = __nccwpck_require__(50813);
-/* harmony import */ var _render_files_analyzed_js__WEBPACK_IMPORTED_MODULE_5__ = __nccwpck_require__(70948);
-/* harmony import */ var url__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(57310);
+/* harmony import */ var _render_results_table_js__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(48189);
+/* harmony import */ var _render_suppresions_js__WEBPACK_IMPORTED_MODULE_3__ = __nccwpck_require__(50813);
+/* harmony import */ var _render_files_analyzed_js__WEBPACK_IMPORTED_MODULE_4__ = __nccwpck_require__(70948);
+/* harmony import */ var url__WEBPACK_IMPORTED_MODULE_5__ = __nccwpck_require__(57310);
 
 
 
@@ -60197,7 +60197,7 @@ __nccwpck_require__.a(__webpack_module__, async (__webpack_handle_async_dependen
 
 
 
-const __filename = (0,url__WEBPACK_IMPORTED_MODULE_2__.fileURLToPath)(import.meta.url);
+const __filename = (0,url__WEBPACK_IMPORTED_MODULE_5__.fileURLToPath)(import.meta.url);
 const __dirname = path__WEBPACK_IMPORTED_MODULE_1__.dirname(__filename);
 
 const PDFDocument = await __nccwpck_require__.e(/* import() */ 619).then(__nccwpck_require__.t.bind(__nccwpck_require__, 6619, 19)).then(pkg => pkg.default || pkg);
@@ -60297,11 +60297,11 @@ async function generatePdfReport(result) {
     // Render Results
     const headers = ['Guideline', 'Category', 'Recategorization', 'Compliance'];
 
-    (0,_render_results_table_js__WEBPACK_IMPORTED_MODULE_3__/* .addTableHeaders */ .T)(headers, doc, LEFT_MARGIN, 430, LINE_MARGIN, [114, 114, 114, 114]);
-    rules.forEach((row, index) => (0,_render_results_table_js__WEBPACK_IMPORTED_MODULE_3__/* .addResultTableRow */ .n)(doc, row, index));
+    (0,_render_results_table_js__WEBPACK_IMPORTED_MODULE_2__/* .addTableHeaders */ .T)(headers, doc, LEFT_MARGIN, 430, LINE_MARGIN, [114, 114, 114, 114]);
+    rules.forEach((row, index) => (0,_render_results_table_js__WEBPACK_IMPORTED_MODULE_2__/* .addResultTableRow */ .n)(doc, row, index));
     doc.addPage();
 
-    (0,_render_suppresions_js__WEBPACK_IMPORTED_MODULE_4__/* .renderDeviations */ .Vz)(doc);
+    (0,_render_suppresions_js__WEBPACK_IMPORTED_MODULE_3__/* .renderDeviations */ .Vz)(doc);
     doc.addPage();
 
     // Render Files Analyzed
@@ -60309,7 +60309,7 @@ async function generatePdfReport(result) {
         .fontSize(TITLE_FONT_SIZE)
         .text('Files Analyzed', LEFT_MARGIN, 75);
 
-    files.forEach((row, index) => (0,_render_files_analyzed_js__WEBPACK_IMPORTED_MODULE_5__/* .addFileAnalyzed */ .G)(doc, row, index));
+    files.forEach((row, index) => (0,_render_files_analyzed_js__WEBPACK_IMPORTED_MODULE_4__/* .addFileAnalyzed */ .G)(doc, row, index));
 
     doc.end();
 }
@@ -60325,9 +60325,17 @@ __webpack_async_result__();
 /* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
 /* harmony export */   "G": () => (/* binding */ addFileAnalyzed)
 /* harmony export */ });
+/* harmony import */ var url__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(57310);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(71017);
+
+
+
+const __filename = (0,url__WEBPACK_IMPORTED_MODULE_0__.fileURLToPath)(import.meta.url);
+const __dirname = path__WEBPACK_IMPORTED_MODULE_1__.dirname(__filename);
+
 let yPos = 125;
 const LEFT_MARGIN = 75;
-const REGULAR_FONT = 'assets/fonts/RobotoMono-Light.ttf';
+const REGULAR_FONT = path__WEBPACK_IMPORTED_MODULE_1__.join(__dirname, 'RobotoMono-Light.ttf');
 const LINE_MARGIN = 15;
 
 let initYPos = 100;
@@ -60359,12 +60367,20 @@ function addFileAnalyzed(doc, file, rowIndex) {
 /* harmony export */   "T": () => (/* binding */ addTableHeaders),
 /* harmony export */   "n": () => (/* binding */ addResultTableRow)
 /* harmony export */ });
+/* harmony import */ var url__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(57310);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(71017);
+
+
+
+const __filename = (0,url__WEBPACK_IMPORTED_MODULE_0__.fileURLToPath)(import.meta.url);
+const __dirname = path__WEBPACK_IMPORTED_MODULE_1__.dirname(__filename);
+
 let yPos = 445;
 const rowHeight = 25;
 const tableWidth = 456;
 const columnWidths = [114, 114, 114, 114];
 const LEFT_MARGIN = 75;
-const REGULAR_FONT = 'assets/fonts/RobotoMono-Light.ttf';
+const REGULAR_FONT = path__WEBPACK_IMPORTED_MODULE_1__.join(__dirname, 'RobotoMono-Light.ttf');
 const LINE_WIDTH = 0.35;
 
 let initYPos = 100;
@@ -60435,11 +60451,19 @@ function addResultTableRow(doc, rowData, rowIndex) {
 /* harmony export */   "Vz": () => (/* binding */ renderDeviations)
 /* harmony export */ });
 /* unused harmony exports addSuppressionTableHeaders, addSuppresionsTableRow */
+/* harmony import */ var url__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(57310);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(71017);
+
+
+
+const __filename = (0,url__WEBPACK_IMPORTED_MODULE_0__.fileURLToPath)(import.meta.url);
+const __dirname = path__WEBPACK_IMPORTED_MODULE_1__.dirname(__filename);
+
 let yPos = 235;
 const tableWidth = 456;
 const columnWidths = [132, 102, 222];
 const LEFT_MARGIN = 75;
-const REGULAR_FONT = 'assets/fonts/RobotoMono-Light.ttf';
+const REGULAR_FONT = path__WEBPACK_IMPORTED_MODULE_1__.join(__dirname, 'RobotoMono-Light.ttf');
 const LINE_WIDTH = 0.35;
 const TITLE_FONT_SIZE = 19;
 const CONTENT_FONT_SIZE = 10;

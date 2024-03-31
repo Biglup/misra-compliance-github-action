@@ -1,9 +1,15 @@
+import {fileURLToPath} from "url";
+import path from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 let yPos = 445;
 const rowHeight = 25;
 const tableWidth = 456;
 const columnWidths = [114, 114, 114, 114];
 const LEFT_MARGIN = 75;
-const REGULAR_FONT = 'assets/fonts/RobotoMono-Light.ttf';
+const REGULAR_FONT = path.join(__dirname, 'RobotoMono-Light.ttf');
 const LINE_WIDTH = 0.35;
 
 let initYPos = 100;

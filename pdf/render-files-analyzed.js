@@ -1,6 +1,12 @@
+import {fileURLToPath} from "url";
+import path from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 let yPos = 125;
 const LEFT_MARGIN = 75;
-const REGULAR_FONT = 'assets/fonts/RobotoMono-Light.ttf';
+const REGULAR_FONT = path.join(__dirname, 'RobotoMono-Light.ttf');
 const LINE_MARGIN = 15;
 
 let initYPos = 100;
