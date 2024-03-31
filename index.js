@@ -1,9 +1,13 @@
+import fs from 'fs';
+import readline from 'readline';
 import core from '@actions/core';
 import * as github from '@actions/github';
 import { cppcheckParser } from './parsers/cppcheckParser.js';
 import { pcLintParser } from './parsers/pclintParser.js';
 import { parseRules } from './rules/parseRules.js';
 import { parseSuppressions } from './rules/parseSuppressions.js';
+import { generatePdfReport } from './pdf/generate-pdf-report.js';
+import {uploadFile} from "./storage/uploadToStorage.js";
 
 const parsers = {
     'Cppcheck': cppcheckParser,
@@ -93,13 +97,105 @@ function getCurrentDateFormatted() {
 const parser = core.getInput('parser');
 const filePathRules = core.getInput('rules');
 const filePathSuppressions = core.getInput('suppressions');
-const filePath = core.getInput('results');
+const resultPath = core.getInput('results');
+const project = core.getInput('project');
+const filesPath = core.getInput('files');
+const outputFile = "report.pdf";
+
+const toComplianceTable = (rules, results, suppresions) => {
+    return rules.map(rule => {
+        const compliant = !results.find(result => result.directive() === rule.directive());
+        const isSuppressed = suppresions.includes(rule.directive());
+        return {
+            directive: 'Directive ' + rule.directive(),
+            category: rule.category(),
+            recategorization: '', // TODO: Implement recategorization
+            compliance: isSuppressed ? 'DEVIATION': (compliant ? 'COMPLIANT' : 'NON-COMPLIANT')
+        };
+    });
+}
+
+async function parseFileList(fileList) {
+    const fileStream = fs.createReadStream(fileList);
+    const lines = readline.createInterface({
+        input: fileStream,
+        crlfDelay: Infinity,
+    });
+
+    const parsedFiles = []; // Initialize an empty array to store the results
+
+    // Await the processing of each line
+    for await (const line of lines) {
+        const [moduleName, path] = line.split('::');
+        const relativePath = path.replace(process.env.GITHUB_WORKSPACE, '');
+        parsedFiles.push(relativePath); // Add the processed line to the array
+    }
+
+    return parsedFiles;
+}
+
+async function uploadReportToGoogleCloud(hash) {
+    // Example usage
+    const bucketName = 'misra-c'; // TODO: Hardcoded for now. Make this an input?
+    const filename = 'report.pdf';
+    const destination = `MISRA_c_compliance_report_${hash}.pdf`;
+
+    return uploadFile(bucketName, filename, destination);
+}
 
 async function run() {
     try {
         const rules = await parseRules(filePathRules);
         const suppressions = await parseSuppressions(filePathSuppressions);
-        const results = await parsers[parser](filePath);
+        const results = await parsers[parser](resultPath);
+        const files = await parseFileList(filesPath);
+        const complianceTable = toComplianceTable(rules, results, suppressions);
+
+        const violationsByCategory = complianceTable.reduce((acc, result) => {
+            if (acc[result.category]) {
+                if (result.compliance !== 'NON-COMPLIANT') return acc;
+                acc[result.category]++;
+            } else {
+                acc[result.category] = 0;
+
+                if (result.compliance === 'NON-COMPLIANT')
+                    acc[result.category]++;
+
+                return acc;
+            }
+
+            return acc;
+        }, {});
+
+        const deviationsByCategory = complianceTable.reduce((acc, result) => {
+            if (acc[result.category]) {
+                if (result.compliance !== 'DEVIATION') return acc;
+                acc[result.category]++;
+            } else {
+                acc[result.category] = 0;
+
+                if (result.compliance === 'DEVIATION')
+                    acc[result.category]++;
+
+                return acc;
+            }
+
+            return acc;
+        }, {});
+
+        await generatePdfReport({
+            rules: complianceTable,
+            files,
+            project,
+            commit: process.env.GITHUB_SHA,
+            date: getCurrentDateFormatted(),
+            guidelines: 'MISRA C 2012', // TODO: make this configurable
+            checkingTool: parser,
+            compliance: results.length > 0 ? 'Non-Compliant' : 'Compliant',
+            outputFile,
+            violationsByCategory,
+            deviationsByCategory
+        });
 
         const github_token = core.getInput('GITHUB_TOKEN');
         const octokit = github.getOctokit(github_token);
@@ -109,7 +205,7 @@ async function run() {
 
         message += '\n';
         message += '<p align="left">\n';
-        message += '   <img src="https://storage.googleapis.com/bunny-island/misra-c-logo.png" width="100" alt="MISRA C Logo">\n';
+        message += '   <img src="https://storage.googleapis.com/biglup/misra_c.svg" width="100" alt="MISRA C Logo">\n';
         message += '</p>\n';
 
         message += '\n';
@@ -141,20 +237,14 @@ async function run() {
 
         if (results.length === 0) {
             message += '\n';
-            message += '## No MISRA C 2012 violations found. :tada:\n';
+
+            const uploadedReport = await uploadReportToGoogleCloud(process.env.GITHUB_SHA);
+            message += '## 🎉 No MISRA C 2012 Violations Found!\n';
+            message += `You can download the report in PDF from here: [MISRA C Report](${uploadedReport})\n`;
+
             await updateMISRAComment(octokit, context, message);
             return;
         }
-
-        const violationsByCategory = results.reduce((acc, result) => {
-            if (acc[result.category()]) {
-                acc[result.category()]++;
-            } else {
-                acc[result.category()] = 1;
-            }
-
-            return acc;
-        }, {});
 
         message += '\n';
         message += '## MISRA C 2012 Violation Summary\n';
@@ -190,6 +280,9 @@ async function run() {
             }
         }
         message += `</details>\n`;
+
+        const uploadedReport = await uploadReportToGoogleCloud(process.env.GITHUB_SHA);
+        message += `You can download the report in PDF from here: [MISRA C Report](${uploadedReport})\n`;
 
         await updateMISRAComment(octokit, context, message);
     } catch (error) {

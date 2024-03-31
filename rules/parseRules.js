@@ -33,7 +33,8 @@ export async function parseRules(filePath) {
             const [_, directive, category] = directiveLine.match(/^Rule (\d+\.\d+) (\w+)/) || [];
 
              // The current line is the rationale
-            rules.push(new Rule(directive, category, line));
+            const newRule = new Rule(directive, category, line);
+            rules.push(newRule);
 
             directiveLine = ''; // Reset for the next rule
         }
