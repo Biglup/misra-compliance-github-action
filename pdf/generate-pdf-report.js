@@ -1,4 +1,6 @@
 import fs from 'fs';
+import path from 'path';
+
 import {addResultTableRow, addTableHeaders} from "./render-results-table.js";
 import {renderDeviations} from "./render-suppresions.js";
 import {addFileAnalyzed} from "./render-files-analyzed.js";
@@ -8,9 +10,9 @@ const PDFDocument = await import('pdfkit').then(pkg => pkg.default || pkg);
 const LEFT_MARGIN = 75;
 const TITLE_FONT_SIZE = 19;
 const CONTENT_FONT_SIZE = 10;
-const REGULAR_FONT = 'assets/fonts/RobotoMono-Light.ttf';
-const BOLD_FONT = 'assets/fonts/RobotoMono-Bold.ttf';
-const MISRA_LOGO = 'assets/misra_c.png';
+const REGULAR_FONT = path.join(__dirname, 'RobotoMono-Light.ttf');
+const BOLD_FONT = path.join(__dirname, 'RobotoMono-Bold.ttf');
+const MISRA_LOGO = path.join(__dirname, 'misra_c.png');
 const MISRA_WIDTH = 85;
 const LINE_MARGIN = 15;
 const SUMMARY_CELL_MARGIN = 100;

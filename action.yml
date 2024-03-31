@@ -17,6 +17,12 @@ inputs:
   suppressions:
     description: 'List of suppresions'
     required: true
+  project:
+    description: 'The project name'
+    required: true
+  files:
+    description: 'The list of analyzed files'
+    required: true
 runs:
   using: 'node20'
   main: 'dist/index.js'

@@ -60183,9 +60183,12 @@ __nccwpck_require__.a(__webpack_module__, async (__webpack_handle_async_dependen
 /* harmony export */   "K": () => (/* binding */ generatePdfReport)
 /* harmony export */ });
 /* harmony import */ var fs__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(57147);
-/* harmony import */ var _render_results_table_js__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(48189);
-/* harmony import */ var _render_suppresions_js__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(50813);
-/* harmony import */ var _render_files_analyzed_js__WEBPACK_IMPORTED_MODULE_3__ = __nccwpck_require__(70948);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(71017);
+/* harmony import */ var _render_results_table_js__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(48189);
+/* harmony import */ var _render_suppresions_js__WEBPACK_IMPORTED_MODULE_3__ = __nccwpck_require__(50813);
+/* harmony import */ var _render_files_analyzed_js__WEBPACK_IMPORTED_MODULE_4__ = __nccwpck_require__(70948);
+
+
 
 
 
@@ -60196,9 +60199,9 @@ const PDFDocument = await __nccwpck_require__.e(/* import() */ 619).then(__nccwp
 const LEFT_MARGIN = 75;
 const TITLE_FONT_SIZE = 19;
 const CONTENT_FONT_SIZE = 10;
-const REGULAR_FONT = 'assets/fonts/RobotoMono-Light.ttf';
-const BOLD_FONT = 'assets/fonts/RobotoMono-Bold.ttf';
-const MISRA_LOGO = 'assets/misra_c.png';
+const REGULAR_FONT = path__WEBPACK_IMPORTED_MODULE_1__.join(__dirname, 'RobotoMono-Light.ttf');
+const BOLD_FONT = path__WEBPACK_IMPORTED_MODULE_1__.join(__dirname, 'RobotoMono-Bold.ttf');
+const MISRA_LOGO = path__WEBPACK_IMPORTED_MODULE_1__.join(__dirname, 'misra_c.png');
 const MISRA_WIDTH = 85;
 const LINE_MARGIN = 15;
 const SUMMARY_CELL_MARGIN = 100;
@@ -60288,11 +60291,11 @@ async function generatePdfReport(result) {
     // Render Results
     const headers = ['Guideline', 'Category', 'Recategorization', 'Compliance'];
 
-    (0,_render_results_table_js__WEBPACK_IMPORTED_MODULE_1__/* .addTableHeaders */ .T)(headers, doc, LEFT_MARGIN, 430, LINE_MARGIN, [114, 114, 114, 114]);
-    rules.forEach((row, index) => (0,_render_results_table_js__WEBPACK_IMPORTED_MODULE_1__/* .addResultTableRow */ .n)(doc, row, index));
+    (0,_render_results_table_js__WEBPACK_IMPORTED_MODULE_2__/* .addTableHeaders */ .T)(headers, doc, LEFT_MARGIN, 430, LINE_MARGIN, [114, 114, 114, 114]);
+    rules.forEach((row, index) => (0,_render_results_table_js__WEBPACK_IMPORTED_MODULE_2__/* .addResultTableRow */ .n)(doc, row, index));
     doc.addPage();
 
-    (0,_render_suppresions_js__WEBPACK_IMPORTED_MODULE_2__/* .renderDeviations */ .Vz)(doc);
+    (0,_render_suppresions_js__WEBPACK_IMPORTED_MODULE_3__/* .renderDeviations */ .Vz)(doc);
     doc.addPage();
 
     // Render Files Analyzed
@@ -60300,7 +60303,7 @@ async function generatePdfReport(result) {
         .fontSize(TITLE_FONT_SIZE)
         .text('Files Analyzed', LEFT_MARGIN, 75);
 
-    files.forEach((row, index) => (0,_render_files_analyzed_js__WEBPACK_IMPORTED_MODULE_3__/* .addFileAnalyzed */ .G)(doc, row, index));
+    files.forEach((row, index) => (0,_render_files_analyzed_js__WEBPACK_IMPORTED_MODULE_4__/* .addFileAnalyzed */ .G)(doc, row, index));
 
     doc.end();
 }
