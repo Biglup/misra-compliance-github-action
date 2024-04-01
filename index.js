@@ -17,6 +17,10 @@ const parsers = {
 async function updateMISRAComment(octokit, context, newCommentBody) {
     const { owner, repo } = context.repo;
 
+    if (!context.payload.pull_request) {
+        return;
+    }
+
     const pullRequestNumber = context.payload.pull_request.number;
 
     // Fetch all comments on the pull request
