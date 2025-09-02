@@ -2,20 +2,43 @@ import fs from 'fs';
 import readline from 'readline';
 import core from '@actions/core';
 import * as github from '@actions/github';
-import { cppcheckParser } from './parsers/cppcheckParser.js';
-import { pcLintParser } from './parsers/pclintParser.js';
-import { parseRules } from './rules/parseRules.js';
-import { parseSuppressions } from './rules/parseSuppressions.js';
-import { generatePdfReport } from './pdf/generate-pdf-report.js';
-import { uploadFile } from "./storage/uploadToStorage.js";
+import {cppcheckParser} from './parsers/cppcheckParser.js';
+import {pcLintParser} from './parsers/pclintParser.js';
+import {parseRules} from './rules/parseRules.js';
+import {parseSuppressions} from './rules/parseSuppressions.js';
+import {generatePdfReport} from './pdf/generate-pdf-report.js';
+import * as artifact from '@actions/artifact';
+import path from 'path';
 
 const parsers = {
     'Cppcheck': cppcheckParser,
     'PC-lint': pcLintParser
 };
 
+async function uploadReportArtifact(artifactName, filePath, retentionDays = 90) {
+    const client = artifact.create();
+    const files = [filePath];
+    const rootDirectory = path.dirname(filePath);
+
+    return client.uploadArtifact(artifactName, files, rootDirectory, {retentionDays});
+}
+
+
+function buildArtifactLink(context, artifactName) {
+    const {owner, repo} = context.repo;
+    const runId = context.runId;
+    const isPrivate = context.payload.repository?.private === true;
+
+    if (!isPrivate) {
+        const encoded = encodeURIComponent(artifactName);
+        return `https://nightly.link/${owner}/${repo}/actions/runs/${runId}/${encoded}.zip`;
+    }
+    return `https://github.com/${owner}/${repo}/actions/runs/${runId}`;
+}
+
+
 async function updateMISRAComment(octokit, context, newCommentBody) {
-    const { owner, repo } = context.repo;
+    const {owner, repo} = context.repo;
 
     if (!context.payload.pull_request) {
         return;
@@ -24,7 +47,7 @@ async function updateMISRAComment(octokit, context, newCommentBody) {
     const pullRequestNumber = context.payload.pull_request.number;
 
     // Fetch all comments on the pull request
-    const { data: comments } = await octokit.rest.issues.listComments({
+    const {data: comments} = await octokit.rest.issues.listComments({
         owner,
         repo,
         issue_number: pullRequestNumber,
@@ -56,19 +79,18 @@ async function updateMISRAComment(octokit, context, newCommentBody) {
 
 function constructFileUrl(filePath, lineNumber, githubContext) {
     const owner = githubContext.payload.repository.owner.login;
-    const repo = githubContext.payload.repository.name;
+    const repo  = githubContext.payload.repository.name;
 
-    // Initialize with commit SHA; it's always available and serves as a good fallback
     let ref = process.env.GITHUB_SHA;
-
-    // If in the context of a pull request, prefer using the PR's branch name
     if (githubContext.eventName === 'pull_request' && githubContext.payload.pull_request) {
-        ref = githubContext.payload.pull_request.head.ref;
+        ref = githubContext.payload.pull_request.head?.sha || ref;
     }
 
-    const basePath = process.env.GITHUB_WORKSPACE;
-    // Ensure filePath is relative to the repository root
-    const relativePath = filePath.startsWith(basePath) ? filePath.substring(basePath.length + 1) : filePath;
+    const ws = process.env.GITHUB_WORKSPACE;
+    const relativePath =
+        (ws && filePath.startsWith(ws))
+            ? filePath.slice(ws.length + (ws.endsWith('/') ? 0 : 1))
+            : filePath.replace(/^\.?\//, ''); // tidy leading "./" or "/"
 
     return `https://github.com/${owner}/${repo}/blob/${ref}/${relativePath}#L${lineNumber}`;
 }
@@ -98,7 +120,7 @@ const toComplianceTable = (rules, results, suppresions) => {
             directive: 'Directive ' + rule.directive(),
             category: rule.category(),
             recategorization: '', // TODO: Implement recategorization
-            compliance: isSuppressed ? 'DEVIATION': (compliant ? 'COMPLIANT' : 'NON-COMPLIANT')
+            compliance: isSuppressed ? 'DEVIATION' : (compliant ? 'COMPLIANT' : 'NON-COMPLIANT')
         };
     });
 }
@@ -122,12 +144,22 @@ async function parseFileList(fileList) {
     return parsedFiles;
 }
 
-async function uploadReportToGoogleCloud(hash) {
-    // Example usage
-    const bucketName = 'misra-c'; // TODO: Hardcoded for now. Make this an input?
-    const destination = `MISRA_c_compliance_report_${hash}.pdf`;
+async function uploadReportAndGetUrl(context) {
+    const shortSha = (process.env.GITHUB_SHA || '').slice(0, 7);
+    const artifactName = `misra-report-${shortSha}`;
+    await uploadReportArtifact(artifactName, outputFile, 90);
+    return buildArtifactLink(context, artifactName);
+}
 
-    return uploadFile(bucketName, outputFile, destination);
+function repoAssetUrl(context, relPath /* e.g., 'assets/misra_c.png' */) {
+    const { owner, repo } = context.repo;
+    const ref       = context.payload.pull_request?.head?.sha || process.env.GITHUB_SHA;
+    const cleanPath = relPath.replace(/^\//, '');
+    const isPrivate = context.payload.repository?.private === true;
+
+    return isPrivate
+        ? `https://github.com/${owner}/${repo}/blob/${ref}/${cleanPath}?raw=1`
+        : `https://raw.githubusercontent.com/${owner}/${repo}/${ref}/${cleanPath}`;
 }
 
 async function run() {
@@ -163,7 +195,7 @@ async function run() {
                 return acc;
             }
             return acc;
-        }, { Advisory: 0, Required: 0, Mandatory: 0 });
+        }, {Advisory: 0, Required: 0, Mandatory: 0});
 
         await generatePdfReport({
             rules: complianceTable,
@@ -187,7 +219,7 @@ async function run() {
 
         message += '\n';
         message += '<p align="left">\n';
-        message += '   <img src="https://storage.googleapis.com/biglup/misra_c.svg" width="100" alt="MISRA C Logo">\n';
+        message += `   <img src="${repoAssetUrl(context, 'assets/misra_c.png')}" width="100" alt="MISRA C Logo">\n`;
         message += '</p>\n';
 
         message += '\n';
@@ -213,14 +245,14 @@ async function run() {
         message += '    </tr>\n';
         message += '    <tr>\n';
         message += '        <td><b>Result:</b></td>\n';
-        message += results.length > 0 ? '        <td>Non-Compliant ❌</td>\n' :  '        <td>Compliant ✅</td>\n';
+        message += results.length > 0 ? '        <td>Non-Compliant ❌</td>\n' : '        <td>Compliant ✅</td>\n';
         message += '    </tr>\n';
         message += '</table>\n';
 
         if (results.length === 0) {
             message += '\n';
 
-            const uploadedReport = await uploadReportToGoogleCloud(process.env.GITHUB_SHA);
+            const uploadedReport = await uploadReportAndGetUrl(context);
             message += '## 🎉 No MISRA C 2012 Violations Found!\n';
             message += `You can download the complete report from: [MISRA C Report](${uploadedReport})\n`;
 
@@ -263,7 +295,7 @@ async function run() {
         }
         message += `</details>\n`;
 
-        const uploadedReport = await uploadReportToGoogleCloud(process.env.GITHUB_SHA);
+        const uploadedReport = await uploadReportAndGetUrl(context);
         message += `\n`;
         message += `You can download the complete report from: [MISRA C Report](${uploadedReport})\n`;
 
