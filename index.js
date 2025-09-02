@@ -7,7 +7,7 @@ import {pcLintParser} from './parsers/pclintParser.js';
 import {parseRules} from './rules/parseRules.js';
 import {parseSuppressions} from './rules/parseSuppressions.js';
 import {generatePdfReport} from './pdf/generate-pdf-report.js';
-import * as artifact from '@actions/artifact';
+import {DefaultArtifactClient} from '@actions/artifact';
 import path from 'path';
 
 const parsers = {
@@ -16,13 +16,11 @@ const parsers = {
 };
 
 async function uploadReportArtifact(artifactName, filePath, retentionDays = 90) {
-    const client = artifact.create();
+    const client = new DefaultArtifactClient();
     const files = [filePath];
     const rootDirectory = path.dirname(filePath);
-
     return client.uploadArtifact(artifactName, files, rootDirectory, {retentionDays});
 }
-
 
 function buildArtifactLink(context, artifactName) {
     const {owner, repo} = context.repo;
@@ -79,7 +77,7 @@ async function updateMISRAComment(octokit, context, newCommentBody) {
 
 function constructFileUrl(filePath, lineNumber, githubContext) {
     const owner = githubContext.payload.repository.owner.login;
-    const repo  = githubContext.payload.repository.name;
+    const repo = githubContext.payload.repository.name;
 
     let ref = process.env.GITHUB_SHA;
     if (githubContext.eventName === 'pull_request' && githubContext.payload.pull_request) {
@@ -152,8 +150,8 @@ async function uploadReportAndGetUrl(context) {
 }
 
 function repoAssetUrl(context, relPath /* e.g., 'assets/misra_c.png' */) {
-    const { owner, repo } = context.repo;
-    const ref       = context.payload.pull_request?.head?.sha || process.env.GITHUB_SHA;
+    const {owner, repo} = context.repo;
+    const ref = context.payload.pull_request?.head?.sha || process.env.GITHUB_SHA;
     const cleanPath = relPath.replace(/^\//, '');
     const isPrivate = context.payload.repository?.private === true;
 
